@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mss", "mss\mss.csproj", "{FF59B107-217C-4518-BB1D-92C473876B72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mss-core", "..\mss-core\mss-core\mss-core.csproj", "{DF92E6E0-8B50-4964-AC3B-095CF359E2D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotBooksCore", "..\notbooks\NotBooksCore\NotBooksCore.csproj", "{781A7120-EF2A-46C1-85A4-8A3EF0F25737}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF59B107-217C-4518-BB1D-92C473876B72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF59B107-217C-4518-BB1D-92C473876B72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF59B107-217C-4518-BB1D-92C473876B72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF59B107-217C-4518-BB1D-92C473876B72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF92E6E0-8B50-4964-AC3B-095CF359E2D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF92E6E0-8B50-4964-AC3B-095CF359E2D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF92E6E0-8B50-4964-AC3B-095CF359E2D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF92E6E0-8B50-4964-AC3B-095CF359E2D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{781A7120-EF2A-46C1-85A4-8A3EF0F25737}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{781A7120-EF2A-46C1-85A4-8A3EF0F25737}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{781A7120-EF2A-46C1-85A4-8A3EF0F25737}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{781A7120-EF2A-46C1-85A4-8A3EF0F25737}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
