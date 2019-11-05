@@ -23,7 +23,7 @@ namespace mss
         internal Paragraph _prev;
         internal Paragraph _main;
         internal Paragraph _next;
-        internal bool? _forward;
+        internal bool _forward = true;
         internal bool _mainChanged;
         internal enum StepMode
         {
@@ -107,7 +107,7 @@ namespace mss
             _main = new Paragraph();
             _next = new Paragraph();
             _stepmode = (StepMode)Properties.Settings.Default.smode;
-            _forward = null;
+            _forward = !(_stepmode == StepMode.Shuffle);
 
             switch (_stepmode)
             {
@@ -198,7 +198,7 @@ namespace mss
 
         private void SetWorkArea()
         {
-            if (!_forward.HasValue) _counter = 1;
+            if (_forward) _counter = 1;
             if (Global.Working.Body.Count > 0 && _sequence > Global.Working.Body.Max(p=>p.Sequence))
                 _sequence = Global.Working.Body.Max(p=>p.Sequence);
             if (_hcounter > Global.HeaderValue) _hcounter = Global.HeaderValue;
@@ -253,22 +253,22 @@ namespace mss
         {
             Paragraph rtnPara = Global.Working.Body.SingleOrDefault(p => p.Sequence == (_sequence + modifier));
 
-            if (rtnPara == null ? false : rtnPara.Heading)
+            if (rtnPara != null)
             {
                 if (modifier == 0)
                 {
                     SetHeading(rtnPara);
-                    _sequence = (_forward ?? true) ? ++_sequence : --_sequence;
-                    rtnPara = GetParagraph(0);
+                    _sequence = _forward ? ++_sequence : --_sequence;
+                    _counter = rtnPara.Number;
                 }
                 else
                 {
                     modifier = modifier > 0 ? ++modifier : --modifier;
-                    rtnPara = GetParagraph(modifier);
                 }
+
+                rtnPara = GetParagraph(modifier);
             }
 
-            if(modifier==0) _counter = rtnPara.Number;
             return rtnPara;
         }
         private void HighlightPhrase(RichTextBox box, string phrase, Color color)
@@ -291,7 +291,7 @@ namespace mss
         {
             lblSection.Text = "Current Section: ";
 
-            if (_forward ?? true)
+            if (_forward)
             {
                 _hcounter = para.Number;
                 lblSection.Text += para.Text;
@@ -715,7 +715,7 @@ namespace mss
                     {
                         int _newsequence;
 
-                        if (_forward.Value)
+                        if (_forward)
                         {
                             for (_newsequence = _sequence+1; _newsequence <= Global.Working.Body.Max(p=>p.Sequence); _newsequence++)
                             {
@@ -756,7 +756,7 @@ namespace mss
                         int _step = 0;
 
                         if (Int32.TryParse(tstStepNo.Text, out _step))
-                            if (_forward.Value)
+                            if (_forward)
                                 _sequence = (_sequence + _step) > Global.Working.Body.Max(p => p.Sequence) ? 
                                     Global.Working.Body.Max(p => p.Sequence) : _sequence + _step;
                             else
@@ -775,7 +775,7 @@ namespace mss
         {
             Paragraph para = null;
 
-            if (_forward.Value)
+            if (_forward)
                 para = Global.Working.Body.FirstOrDefault(p => (p.Sequence > _sequence)
                     && (p.Text.Contains(s))
                     && (!p.Heading));
