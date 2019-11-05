@@ -114,11 +114,9 @@ namespace mss
                     }
 
                 }
-                else
-                {
-                    CurrentFile = ofd.FileName;
-                    doOpen(ofd.FilterIndex);
-                }
+
+                CurrentFile = ofd.FileName;
+                doOpen(ofd.FilterIndex);
             }
         }
         internal static void LoadCurrentFile()

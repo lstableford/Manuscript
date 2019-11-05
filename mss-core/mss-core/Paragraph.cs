@@ -80,9 +80,9 @@ namespace mss_core
         {
             Number = n;
         }
-        public void SetSequence(int? s)
+        public void SetSequence(int s)
         {
-            Sequence = s.HasValue ? s.Value : 0;
+            Sequence = s;
         }
         private void GetWords()
         {
