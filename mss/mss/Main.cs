@@ -17,13 +17,15 @@ namespace mss
     {
         #region properties
 
+        [Obsolete("This has been replaced by _paragraphNumber")]
         internal int _counter;
+        internal int _paragraphNumber = 0;
         internal int _hcounter;
         internal int _sequence;
         internal Paragraph _prev;
         internal Paragraph _main;
         internal Paragraph _next;
-        internal bool? _forward;
+        internal bool _forward = true;
         internal bool _mainChanged;
         internal enum StepMode
         {
@@ -100,14 +102,17 @@ namespace mss
         }
         private void ClearWorkSpace()
         {
-            _counter = 0;
+            _paragraphNumber = 0;
             _hcounter = -1;
             _sequence = 1;
             _prev = new Paragraph();
             _main = new Paragraph();
             _next = new Paragraph();
             _stepmode = (StepMode)Properties.Settings.Default.smode;
-            _forward = null;
+            _forward = !(_stepmode == StepMode.Shuffle);
+            txtMain.Text = string.Empty;
+            txtPrev.Text = string.Empty;
+            txtNext.Text = string.Empty;
 
             switch (_stepmode)
             {
@@ -134,7 +139,7 @@ namespace mss
                 if (Global.Working.CurrentBookMark > 1)
                 {
                     _sequence = Global.Working.CurrentBookMark;
-                    _counter = Global.Working.Body.SingleOrDefault(p => p.Sequence == _sequence).Number;
+                    _paragraphNumber = Global.Working.Body.SingleOrDefault(p => p.Sequence == _sequence).Number;
                 }
                 SetWorkArea();
             }
@@ -198,13 +203,20 @@ namespace mss
 
         private void SetWorkArea()
         {
-            if (!_forward.HasValue) _counter = 1;
-            if (Global.Working.Body.Count > 0 && _sequence > Global.Working.Body.Max(p=>p.Sequence))
-                _sequence = Global.Working.Body.Max(p=>p.Sequence);
-            if (_hcounter > Global.HeaderValue) _hcounter = Global.HeaderValue;
+            if (_forward && _paragraphNumber < 1) _paragraphNumber = 1;
 
-            _main = GetParagraph(Convert.ToInt32(GetPara.Main));
-            txtMain.Text = _main ==null ? string.Empty :_main.Text;
+            if (Global.Working.Body.Count > 0 && _sequence > Global.Working.Body.Max(p => p.Sequence))
+            {
+                _sequence = Global.Working.Body.Max(p => p.Sequence);
+            }
+
+            if (_hcounter > Global.HeaderValue)
+            {
+                _hcounter = Global.HeaderValue;
+            }
+
+            _main = GetParagraphByNumber(_paragraphNumber);
+            txtMain.Text = _main == null ? string.Empty :_main.Text;
             Global.Working.SetCurrentBookmark(_main.Sequence);
             if (Global.Working.DangerWords.Count > 0)
             {
@@ -214,9 +226,9 @@ namespace mss
                 }
             }
 
-            if (_counter > 1)
+            if (_paragraphNumber > 1)
             {
-                _prev = GetParagraph(Convert.ToInt32(GetPara.Previous));
+                _prev = GetParagraphByNumber(_paragraphNumber - 1);
                 txtPrev.Text = _prev.Text;
             }
             else
@@ -225,9 +237,9 @@ namespace mss
                 txtPrev.Text = String.Empty;
             }
 
-            if (_counter < Global.MaxBody)
+            if (_paragraphNumber < Global.MaxBody)
             {
-                _next = GetParagraph(Convert.ToInt32(GetPara.Next));
+                _next = GetParagraphByNumber(_paragraphNumber + 1);
                 txtNext.Text = _next.Text;
             }
             else
@@ -249,17 +261,18 @@ namespace mss
                 sblCompletePC.Text = Global.Working.CompletionPC.ToString() + "% of " + Global.Working.Title + " complete.";
             }
         }
+        [Obsolete("To be replaced by GetParagraphByNumber()")]
         private Paragraph GetParagraph(int modifier)
         {
             Paragraph rtnPara = Global.Working.Body.SingleOrDefault(p => p.Sequence == (_sequence + modifier));
 
-            if (rtnPara == null ? false : rtnPara.Heading)
+            if (rtnPara != null)
             {
                 if (modifier == 0)
                 {
                     SetHeading(rtnPara);
-                    _sequence = (_forward ?? true) ? ++_sequence : --_sequence;
-                    rtnPara = GetParagraph(0);
+                    _sequence = _forward ? ++_sequence : --_sequence;
+                    _counter = rtnPara.Number;
                 }
                 else
                 {
@@ -268,8 +281,13 @@ namespace mss
                 }
             }
 
-            if(modifier==0) _counter = rtnPara.Number;
             return rtnPara;
+        }
+        private Paragraph GetParagraphByNumber(int n)
+        {
+            Paragraph rtn = Global.Working.Body.SingleOrDefault(p => p.Number == n);
+
+            return rtn;
         }
         private void HighlightPhrase(RichTextBox box, string phrase, Color color)
         {
@@ -291,7 +309,7 @@ namespace mss
         {
             lblSection.Text = "Current Section: ";
 
-            if (_forward ?? true)
+            if (_forward)
             {
                 _hcounter = para.Number;
                 lblSection.Text += para.Text;
@@ -387,7 +405,7 @@ namespace mss
         private void btnPrev_Click(object sender, EventArgs e)
         { 
             SaveMain();
-            --_counter;
+            --_paragraphNumber;
             --_sequence;
             _forward = false;
             SetWorkArea();
@@ -395,14 +413,14 @@ namespace mss
         private void btnNext_Click(object sender, EventArgs e)
         {
             SaveMain();
-            ++_counter;
+            ++_paragraphNumber;
             ++_sequence;
             _forward = true;
             SetWorkArea();
         }
         private void SaveMain()
         {
-            Paragraph mainP = Global.Working.Body.Single(p => p.Number == _counter);
+            Paragraph mainP = Global.Working.Body.Single(p => p.Number == _paragraphNumber);
             
             mainP.Text = txtMain.Text;
             mainP.Score = Convert.ToInt32(tscParaScore.SelectedItem);
@@ -523,6 +541,7 @@ namespace mss
         #region file menu
         private void tsmNew_Click(object sender, EventArgs e)
         {
+            Global.CurrentFile = null;
             Setup();
         }
         private void tsmOpen_Click(object sender, EventArgs e)
@@ -634,7 +653,7 @@ namespace mss
         {
             tssbStepMode.Image = Properties.Resources.pencil;
             tstStepNo.Enabled = false;
-            _counter = 1;
+            _paragraphNumber = 1;
         }
         private void tsoShuffle_Click(object sender, EventArgs e)
         {
@@ -657,7 +676,7 @@ namespace mss
         {
             SaveMain();
             _sequence = 1;
-            _counter = 1;
+            _paragraphNumber = 1;
             _forward = true;
             SetWorkArea();
         }
@@ -682,7 +701,7 @@ namespace mss
         private void tsbEnd_Click(object sender, EventArgs e)
         {
             SaveMain();
-            _counter = Global.MaxBody;
+            _paragraphNumber = Global.MaxBody;
             _sequence = Global.Working.Body.Where(p => !p.Heading).Max(p => p.Sequence);
             _forward = true;
             SetWorkArea();
@@ -715,7 +734,7 @@ namespace mss
                     {
                         int _newsequence;
 
-                        if (_forward.Value)
+                        if (_forward)
                         {
                             for (_newsequence = _sequence+1; _newsequence <= Global.Working.Body.Max(p=>p.Sequence); _newsequence++)
                             {
@@ -756,7 +775,7 @@ namespace mss
                         int _step = 0;
 
                         if (Int32.TryParse(tstStepNo.Text, out _step))
-                            if (_forward.Value)
+                            if (_forward)
                                 _sequence = (_sequence + _step) > Global.Working.Body.Max(p => p.Sequence) ? 
                                     Global.Working.Body.Max(p => p.Sequence) : _sequence + _step;
                             else
@@ -775,7 +794,7 @@ namespace mss
         {
             Paragraph para = null;
 
-            if (_forward.Value)
+            if (_forward)
                 para = Global.Working.Body.FirstOrDefault(p => (p.Sequence > _sequence)
                     && (p.Text.Contains(s))
                     && (!p.Heading));
@@ -827,7 +846,7 @@ namespace mss
             {
                 Global.Working.Body.Remove(Global.Working.Body.Single(p => p.Number == _hcounter));
                 Global.Working.Recalculate();
-                _counter--;
+                _paragraphNumber--;
                 _sequence--;
                 SetWorkArea();
             }

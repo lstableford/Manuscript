@@ -28,7 +28,7 @@ namespace mss_core
         }
         public void Init()
         {
-            _body = new List<Paragraph>();
+            Body = new List<Paragraph>();
             InvisibleWords = new List<string>();
             DangerWords = new List<string>();
             ScoreMax = _defaultSM;
@@ -44,13 +44,9 @@ namespace mss_core
         
         private int _defaultSM = 5;
         private int _defaultFT = 50;
-        private List<Paragraph> _body;
         public string Title { get; set; }
         public string Author { get; set; }
-        public List<Paragraph> Body {
-            get { return _body;}
-            set { _body = value;}
-        }
+        public List<Paragraph> Body { get; set; } = new List<Paragraph>();
         public int FlagThreshold { get; set; }
         public FlagMode FlagOn { get; set; }
         public int WordCount

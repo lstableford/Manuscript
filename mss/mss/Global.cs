@@ -12,12 +12,7 @@ namespace mss
 {
     internal static class Global
     {
-        private static Manuscript _working;
-        internal static Manuscript Working
-        {
-            get { return _working;  }
-            set { _working = value; }
-        }
+        internal static Manuscript Working { get; set; }
         internal static int MaxBody
         {
             get
@@ -32,7 +27,7 @@ namespace mss
         {
             get
             {
-                Paragraph para = _working.Body.FirstOrDefault(p => p.Heading);
+                Paragraph para = Working.Body.FirstOrDefault(p => p.Heading);
                 return para == null ? 0 : para.Number;
             }
         }
@@ -119,11 +114,9 @@ namespace mss
                     }
 
                 }
-                else
-                {
-                    CurrentFile = ofd.FileName;
-                    doOpen(ofd.FilterIndex);
-                }
+
+                CurrentFile = ofd.FileName;
+                doOpen(ofd.FilterIndex);
             }
         }
         internal static void LoadCurrentFile()
